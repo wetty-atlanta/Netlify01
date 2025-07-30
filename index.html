@@ -112,7 +112,6 @@
     </div>
 
     <script type="module">
-        // ▼▼▼ ここのURLを修正しました ▼▼▼
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -126,6 +125,8 @@
           measurementId: "G-QBL6YSWTXL"
         };
         
+        // ▼▼▼ ここから修正 ▼▼▼
+        
         const questionInput = document.getElementById('question-input');
         const submitButton = document.getElementById('submit-button');
         const answerDisplay = document.getElementById('answer-display');
@@ -133,10 +134,13 @@
         
         let plotContent = "";
 
+        // Firebaseの初期化を一度だけ実行
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         async function loadPlotFromDB() {
             try {
-                const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
+                // ドキュメントの場所を指定
                 const docRef = doc(db, "plots", "mainPlot");
                 const docSnap = await getDoc(docRef);
 
@@ -156,6 +160,7 @@
             }
         }
         
+        // ページ読み込み時に実行
         loadPlotFromDB();
 
         submitButton.addEventListener('click', async () => {
