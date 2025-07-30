@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<body>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // (中略... firebaseConfig の定義まで変更なし)
+        
+        const questionInput = document.getElementById('question-input');
+        const submitButton = document.getElementById('submit-button');
+        const answerDisplay = document.getElementById('answer-display');
+        
+        let plotContent = "";
+
+        // (中略... loadPlotFromDB() 関数の終わりまで変更なし)
+        
+        loadPlotFromDB();
+
+        submitButton.addEventListener('click', async () => {
+            const question = questionInput.value;
+            if (!question.trim()) {
+                alert('質問を入力してください。');
+                return;
+            }
+            
+            answerDisplay.innerText = 'AIが回答を生成中です...';
+            submitButton.disabled = true;
+
+            try {
+                // ▼▼▼ 呼び出し先のURLをNetlify用に変更 ▼▼▼
+                const response = await fetch('/.netlify/functions/ask-gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`サーバーエラー: ${errorData.details || errorData.error || response.statusText}`);
+                }
+
+                const data = await response.json();
+                answerDisplay.innerText = data.answer;
+
+            } catch (error) {
+                console.error('エラー:', error);
+                answerDisplay.innerText = `AIとの通信中にエラーが発生しました。\n${error.message}`;
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
